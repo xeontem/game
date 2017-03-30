@@ -4,6 +4,7 @@ let GameState = {
 	preload: function(){
 		this.load.image('background', 'assets/img/back.jpeg');
 		this.load.image('mainPlayer', 'assets/img/main.png');
+		this.load.image('bullet', 'assets/img/shot.png');
 	},
 	create: function(){
 		this.background = this.game.add.tileSprite(0, 0, 1024, 768, 'background');
@@ -15,6 +16,19 @@ let GameState = {
 		this.mainPlayer.angle = 90;
 		this.physics.enable(this.mainPlayer, Phaser.Physics.ARCADE);
 		this.cursors = this.input.keyboard.createCursorKeys();
+		this.fireButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+		this.bullets = this.game.add.group();
+		this.bullets.enableBody = true;
+		this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+		this.bullets.createMultiple(30, 'bullet');
+		this.bullets.setAll('anchor.x', 0.5);
+		this.bullets.setAll('anchor.y', 1);
+		this.bullets.setAll('outOfBoundsKill', true);
+		this.bullets.setAll('checkWorldBounds', true);
+
+		
+		this.bulletTime = 0;
 	},
 	update: function(){
 		// this.mainPlayer.angle += 1;
@@ -39,7 +53,23 @@ let GameState = {
 		if(this.cursors.down.isDown){
 			this.mainPlayer.body.velocity.y = 350;
 		}
+		if(this.fireButton.isDown){
+			fireBullet.call(this);
+		}
 	}
 };
+
+function fireBullet(){
+	if(this.game.time.now > this.bulletTime){
+		this.bullet = this.bullets.getFirstExists(false);
+
+		if(this.bullet){
+			this.bullet.reset(this.mainPlayer.x+60, this.mainPlayer.y+2);
+			this.bullet.body.velocity.x = 800;
+			this.bulletTime = this.game.time.now + 200; 
+		}
+	}
+}
+
 game.state.add('GameState', GameState);
 game.state.start('GameState');
